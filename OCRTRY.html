@@ -1,0 +1,340 @@
+<!DOCTYPE html><html lang="zh-TW"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR 圖片文字識別系統</title>
+    <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .upload-section {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #error-message {
+            display: none;
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        #status {
+            margin: 10px 0;
+            color: #666;
+        }
+
+        .result-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #2980b9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .price-history {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OCR 圖片文字識別系統</h1>
+        
+        <div class="upload-section">
+            <label class="custom-file-upload">
+                <input type="file" id="imageInput" accept="image/*">
+                選擇圖片
+            </label>
+            <p>支援 PNG、JPG 格式，檔案大小限制 5MB</p>
+        </div>
+
+        <div class="loading">
+            <div class="spinner"></div>
+            <p id="status">處理中...</p>
+        </div>
+
+        <div id="error-message"></div>
+
+        <div class="result-section">
+            <h2>識別結果</h2>
+            <div id="result"></div>
+        </div>
+
+        <div class="price-history">
+            <h3>價格歷史記錄</h3>
+            <table id="priceHistory">
+                <thead>
+                    <tr>
+                        <th>型號</th>
+                        <th>價格</th>
+                        <th>更新時間</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 歷史記錄將透過 JavaScript 動態添加 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let worker = null;
+        const priceHistory = [];
+
+        async function initTesseract() {
+            try {
+                if (worker) {
+                    await worker.terminate();
+                }
+                
+                console.log('開始初始化 Tesseract...');
+                worker = await Tesseract.createWorker({
+                    logger: m => console.log(m),
+                    errorHandler: err => console.error('Tesseract 錯誤:', err)
+                });
+                
+                console.log('載入語言檔...');
+                await worker.loadLanguage('eng+chi_tra');
+                
+                console.log('初始化 API...');
+                await worker.initialize('eng+chi_tra');
+                
+                console.log('Tesseract 初始化完成');
+                return true;
+            } catch (error) {
+                console.error('Tesseract 初始化失敗:', error);
+                showError('系統初始化失敗，請重新整理頁面');
+                return false;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function addPriceToHistory(model, price) {
+            const now = new Date();
+            priceHistory.unshift({
+                model,
+                price,
+                timestamp: now.toLocaleString()
+            });
+
+            // 更新表格
+            updatePriceHistoryTable();
+        }
+
+        function updatePriceHistoryTable() {
+            const tbody = document.querySelector('#priceHistory tbody');
+            tbody.innerHTML = '';
+
+            priceHistory.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.model}</td>
+                    <td>${record.price}</td>
+                    <td>${record.timestamp}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function processImage(file) {
+            const status = document.getElementById('status');
+            const loading = document.querySelector('.loading');
+            const errorDiv = document.getElementById('error-message');
+            const resultDiv = document.getElementById('result');
+            
+            loading.style.display = 'block';
+            status.textContent = '正在處理圖片...';
+            errorDiv.style.display = 'none';
+            resultDiv.innerHTML = '';
+            
+            try {
+                if (!worker || !(await initTesseract())) {
+                    throw new Error('OCR 系統未能正確初始化');
+                }
+
+                const base64Image = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
+
+                status.textContent = '正在識別文字...';
+                console.log('開始識別文字');
+
+                const result = await worker.recognize(base64Image, {
+                    lang: 'eng+chi_tra',
+                    logger: m => {
+                        console.log(m);
+                        status.textContent = `處理中: ${Math.floor(m.progress * 100)}%`;
+                    }
+                });
+
+                console.log('識別完成');
+                
+                const text = result.data.text;
+                resultDiv.innerHTML = `<pre>${text}</pre>`;
+
+                // 解析價格並更新歷史記錄
+                const lines = text.split('\n');
+                lines.forEach(line => {
+                    const priceMatch = line.match(/iPhone\s*(\d+)\s*[$NT]*\s*(\d+,?\d*)/i);
+                    if (priceMatch) {
+                        const model = `iPhone ${priceMatch[1]}`;
+                        const price = priceMatch[2];
+                        addPriceToHistory(model, price);
+                    }
+                });
+
+                status.textContent = '處理完成';
+                
+            } catch (error) {
+                console.error('圖片處理錯誤:', error);
+                errorDiv.innerHTML = `
+                    處理圖片時發生錯誤：<br>
+                    ${error.message}<br>
+                    <small style="color: #666;">請確保：<br>
+                    1. 圖片清晰且為正面方向<br>
+                    2. 圖片包含完整的價格信息<br>
+                    3. 圖片大小在 5MB 以內<br>
+                    4. 使用 PNG 或 JPG 格式</small>
+                `;
+                errorDiv.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        document.getElementById('imageInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                try {
+                    if (!file.type.match('image.*')) {
+                        throw new Error('請上傳圖片檔案');
+                    }
+                    
+                    if (file.size > 5 * 1024 * 1024) {
+                        throw new Error('圖片大小不能超過 5MB');
+                    }
+                    
+                    const img = await createImageBitmap(file);
+                    if (img.width < 100 || img.height < 100) {
+                        throw new Error('圖片尺寸太小');
+                    }
+                    
+                    await processImage(file);
+                    
+                } catch (error) {
+                    console.error('上傳處理錯誤:', error);
+                    showError(error.message);
+                }
+            }
+        });
+
+        // 在頁面載入時初始化 Tesseract
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('頁面載入完成，開始初始化 Tesseract...');
+            await initTesseract();
+        });
+    </script>
+
+
+</body></html>
