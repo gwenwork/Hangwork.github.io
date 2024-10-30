@@ -156,37 +156,144 @@
                 }
             });
 
-            const modelPriority = {
-                'IPAD 9': 1,
-                'IPAD 10': 2,
-                'IPAD MINI 6': 3,
-                'IPAD AIR 5': 4,
-                'IPAD PRO 11 4': 5,
-                'IPAD PRO 12.9 6': 6
-            };
+const modelPriority = {
+    'IPHONE SE 3RD GEN': 1,
+    'IPHONE 12': 2,
+    'IPHONE 13 MINI': 3,
+    'IPHONE 13': 4,
+    'IPHONE 14': 5,
+    'IPHONE 14 PLUS': 6,
+    'IPHONE 14 PRO': 7,
+    'IPHONE 14 PRO MAX': 8,
+    'IPHONE 15': 9,
+    'IPHONE 15 PLUS': 10,
+    'IPHONE 15 PRO': 11,
+    'IPHONE 15 PRO MAX': 12,
+    'IPHONE 16': 13,
+    'IPHONE 16 PLUS': 14,
+    'IPHONE 16 PRO': 15,
+    'IPHONE 16 PRO MAX': 16
+};
 
-            const colorPriority = {
-                // Standard Colors
-                'SPACE GRAY': 1,
-                'SILVER': 2,
-                'PINK': 3,
-                'PURPLE': 4,
-                'BLUE': 5,
-                'STARLIGHT': 6,
-                
-                // Pro Colors
-                'PRO_SPACE GRAY': 1,
-                'PRO_SILVER': 2
-            };
+const colorPriority = {
+    'SE_3RD_GEN': {
+        'MIDNIGHT': 1,
+        'WHITE': 2,
+        'RED': 3
+    },
+    'IPHONE_12': {
+        'MIDNIGHT': 1,
+        'WHITE': 2,
+        'BLUE': 3,
+        'GREEN': 4,
+        'PURPLE': 5,
+        'RED': 6
+    },
+    'IPHONE_13': {
+        'MIDNIGHT': 1,
+        'WHITE': 2,
+        'BLUE': 3,
+        'GREEN': 4,
+        'PINK': 5,
+        'RED': 6
+    },
+    'IPHONE_13_MINI': {
+        'MIDNIGHT': 1,
+        'WHITE': 2,
+        'BLUE': 3,
+        'GREEN': 4,
+        'PINK': 5,
+        'RED': 6
+    },
+    'IPHONE_14': {
+        'MIDNIGHT': 1,
+        'WHITE': 2,
+        'BLUE': 3,
+        'PURPLE': 4,
+        'YELLOW': 5,
+        'RED': 6
+    },
+    'IPHONE_14_PLUS': {
+        'MIDNIGHT': 1,
+        'WHITE': 2,
+        'BLUE': 3,
+        'PURPLE': 4,
+        'YELLOW': 5,
+        'RED': 6
+    },
+    'IPHONE_14_PRO': {
+        'PURPLE': 1,
+        'GOLD': 2,
+        'WHITE': 3,
+        'GRAY': 4
+    },
+    'IPHONE_14_PRO_MAX': {
+        'PURPLE': 1,
+        'GOLD': 2,
+        'WHITE': 3,
+        'GRAY': 4
+    },
+    'IPHONE_15': {
+        'BLACK': 1,
+        'BLUE': 2,
+        'GREEN': 3,
+        'PINK': 4,
+        'YELLOW': 5
+    },
+    'IPHONE_15_PLUS': {
+        'BLACK': 1,
+        'BLUE': 2,
+        'GREEN': 3,
+        'PINK': 4,
+        'YELLOW': 5
+    },
+    'IPHONE_15_PRO': {
+        'NATURAL': 1,
+        'WHITE': 2,
+        'BLACK': 3,
+        'BLUE': 4
+    },
+    'IPHONE_15_PRO_MAX': {
+        'NATURAL': 1,
+        'WHITE': 2,
+        'BLACK': 3,
+        'BLUE': 4
+    },
+    'IPHONE_16': {
+        'BLACK': 1,
+        'WHITE': 2,
+        'ULTRAMARINE': 3,
+        'TEAL': 4,
+        'PINK': 5
+    },
+    'IPHONE_16_PLUS': {
+        'BLACK': 1,
+        'WHITE': 2,
+        'ULTRAMARINE': 3,
+        'TEAL': 4,
+        'PINK': 5
+    },
+    'IPHONE_16_PRO': {
+        'DESERT': 1,
+        'NATURAL': 2,
+        'WHITE': 3,
+        'BLACK': 4
+    },
+    'IPHONE_16_PRO_MAX': {
+        'DESERT': 1,
+        'NATURAL': 2,
+        'WHITE': 3,
+        'BLACK': 4
+    }
+};
 
-            const capacityPriority = {
-                '64GB': 1,
-                '128GB': 2,
-                '256GB': 3,
-                '512GB': 4,
-                '1TB': 5,
-                '2TB': 6
-            };
+const capacityPriority = {
+    '64GB': 1,
+    '128GB': 2,
+    '256GB': 3,
+    '512GB': 4,
+    '1TB': 5
+};
 
             function parseModelInfo(description) {
                 if (!description) return null;
