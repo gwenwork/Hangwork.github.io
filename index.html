@@ -1,0 +1,315 @@
+<!DOCTYPE html><html><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <title>Unlocked Vz IPad Table Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f7;
+        }
+        .container {
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #1d1d1f;
+        }
+        #hot-table {
+            height: 400px;
+            overflow: auto;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+        .copy-button {
+            padding: 8px 16px;
+            background-color: white;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: normal;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .copy-button:hover {
+            background-color: #f5f5f5;
+            border-color: #999;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e5e5e5;
+        }
+        .summary-table th, 
+        .summary-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e5e5;
+            font-size: 14px;
+        }
+        .summary-table th {
+            background-color: #f8f8f8;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        .summary-table td {
+            color: #484848;
+        }
+        .summary-table tbody tr:hover {
+            background-color: #f8f8f8;
+        }
+        .summary-table tfoot tr td {
+            background-color: #f8f8f8;
+            font-weight: 600;
+            border-bottom: none;
+        }
+        #copyArea {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <span id="titleText">Unlocked Vz IPad Table Generator</span>
+        </h1>
+        <div id="hot-table"></div>
+        <div class="button-group">
+            <button class="copy-button" onclick="copyTable()">Copy Table</button>
+            <a href="https://eunicemak626.github.io/EuniceTools.github.io/LockedTable.html" class="copy-button">→ Switch Mode</a>
+        </div>
+        
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th><span id="headerText">UNLOCKED N/A</span></th>
+                    <th>Capacity</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody id="summary-body">
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Total</td>
+                    <td></td>
+                    <td id="total-quantity">0</td>
+                </tr>
+            </tfoot>
+        </table>
+        <textarea id="copyArea" readonly=""></textarea>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('hot-table');
+            const hot = new Handsontable(container, {
+                data: [['', '', '']], 
+                colHeaders: ['IMEI', 'Serial', 'Model'],
+                rowHeaders: true,
+                width: '100%',
+                autoRowSize: true,
+                minSpareRows: 1,
+                stretchH: 'all',
+                fixedRowsTop: 0,
+                height: 400,
+                licenseKey: 'non-commercial-and-evaluation',
+                contextMenu: true,
+                afterChange: function(changes) {
+                    if (changes) {
+                        updateSummaryTable();
+                    }
+                }
+            });
+
+            const modelPriority = {
+                'IPAD 9': 1,
+                'IPAD 10': 2,
+                'IPAD MINI 6': 3,
+                'IPAD AIR 5': 4,
+                'IPAD PRO 11 4': 5,
+                'IPAD PRO 12.9 6': 6
+            };
+
+            const colorPriority = {
+                // Standard Colors
+                'SPACE GRAY': 1,
+                'SILVER': 2,
+                'PINK': 3,
+                'PURPLE': 4,
+                'BLUE': 5,
+                'STARLIGHT': 6,
+                
+                // Pro Colors
+                'PRO_SPACE GRAY': 1,
+                'PRO_SILVER': 2
+            };
+
+            const capacityPriority = {
+                '64GB': 1,
+                '128GB': 2,
+                '256GB': 3,
+                '512GB': 4,
+                '1TB': 5,
+                '2TB': 6
+            };
+
+            function parseModelInfo(description) {
+                if (!description) return null;
+                
+                const parts = description.split(' ');
+                if (parts.length < 3) return null;
+
+                const capacityIndex = parts.findIndex(part => part.includes('GB') || part.includes('TB'));
+                if (capacityIndex === -1) return null;
+
+                const model = parts.slice(0, capacityIndex).join(' ');
+                const capacity = parts[capacityIndex];
+                const color = parts.slice(capacityIndex + 1).join(' ');
+
+                return {
+                    model: model + ' ' + color,
+                    capacity: capacity
+                };
+            }
+
+            function updateSummaryTable() {
+                const data = hot.getData();
+                const modelCounts = {};
+                let total = 0;
+
+                data.forEach(row => {
+                    if (row[2]) {
+                        const info = parseModelInfo(row[2]);
+                        if (info) {
+                            const key = `${info.model}|${info.capacity}`;
+                            modelCounts[key] = (modelCounts[key] || 0) + 1;
+                        }
+                    }
+                });
+
+                const sortedEntries = Object.entries(modelCounts).sort((a, b) => {
+                    const [modelStrA, capacityA] = a[0].split('|');
+                    const [modelStrB, capacityB] = b[0].split('|');
+
+                    // Get base model
+                    const baseModelA = Object.keys(modelPriority).find(model => modelStrA.includes(model));
+                    const baseModelB = Object.keys(modelPriority).find(model => modelStrB.includes(model));
+
+                    // Compare base models
+                    if (modelPriority[baseModelA] !== modelPriority[baseModelB]) {
+                        return modelPriority[baseModelA] - modelPriority[baseModelB];
+                    }
+
+                    // Get color (last word before capacity)
+                    const getColor = (str) => {
+                        const parts = str.split(' ');
+                        const capacityIndex = parts.findIndex(part => part.includes('GB') || part.includes('TB'));
+                        return parts.slice(capacityIndex + 1).join(' ');
+                    };
+
+                    const colorA = getColor(modelStrA);
+                    const colorB = getColor(modelStrB);
+
+                    // Add prefix for Pro models
+                    const getColorWithPrefix = (modelStr, color) => {
+                        if (modelStr.includes('PRO')) return `PRO_${color}`;
+                        return color;
+                    };
+
+                    const colorKeyA = getColorWithPrefix(modelStrA, colorA);
+                    const colorKeyB = getColorWithPrefix(modelStrB, colorB);
+
+                    const colorPriorityA = colorPriority[colorKeyA] || 999;
+                    const colorPriorityB = colorPriority[colorKeyB] || 999;
+
+                    if (colorPriorityA !== colorPriorityB) {
+                        return colorPriorityA - colorPriorityB;
+                    }
+
+                    // Compare capacities
+                    return capacityPriority[capacityA] - capacityPriority[capacityB];
+                });
+
+                const summaryBody = document.getElementById('summary-body');
+                summaryBody.innerHTML = '';
+
+                sortedEntries.forEach(([key, count]) => {
+                    const [model, capacity] = key.split('|');
+                    if (model && capacity) {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${model}</td>
+                            <td>${capacity}</td>
+                            <td>${count}</td>
+                        `;
+                        summaryBody.appendChild(tr);
+                        total += count;
+                    }
+                });
+
+                document.getElementById('total-quantity').textContent = total;
+            }
+
+            function copyTable() {
+                const tbody = document.getElementById('summary-body');
+                const copyArea = document.getElementById('copyArea');
+                let textToCopy = '';
+                
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    const rowData = Array.from(cells).map(cell => cell.textContent.trim());
+                    textToCopy += rowData.join('\t') + '\n';
+                });
+                
+                copyArea.value = textToCopy;
+                copyArea.select();
+                document.execCommand('copy');
+            }
+
+            // Make functions globally accessible
+            window.copyTable = copyTable;
+            window.updateSummaryTable = updateSummaryTable;
+
+            // Initial update
+            updateSummaryTable();
+        });
+    </script>
+
+
+</body></html>
